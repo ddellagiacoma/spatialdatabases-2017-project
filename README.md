@@ -1,5 +1,7 @@
 # From Planimetry to Graph - A First Step Towards the Implementation of an Efficient AED Program
 
+## 1. SPATIAL QUERIES 
+
 It has been assumed that the machine, which will run the script, has an available PostgreSQL database which contains a PostGIS installation.
 
 The transformation from shapefiles into graphs has been thought in order to make the **GraphGenerator.py** script work on as many different planimetries as possible. However, it was impossible for the first queries to predict the field names of the input planimetry. Then, some arrangements are needed before running the script such as checking and adapting the queries responsible for the import of the shapefile fields into the dataset.
@@ -94,7 +96,7 @@ Anyway, the scripts life-cycle for these three variants is basically the same an
 
 ### Import and reading the graph shapefiles
 
-The free software python library NetworkX has been used to process the graph.
+The free software python library [NetworkX](https://networkx.github.io/) has been used to process the graph.
 
 NetworkX is a python language software package for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks.
 
@@ -120,11 +122,24 @@ Since the algorithm save for every node its total length, we can easily know the
 
 For the algorithm implementations has not been thought about speed optimizations, in fact the execution time is equal to O(V^2E + V^3logV) where V represent the number of nodes contained in the graph and E the number of edges. However, planimetries do not usually contain such a large number of rooms that could make an important difference in term of running time.
 
+Procedure | Complexity | Lines
+--- | --- | --- |
+Initialization |O(V) | 1 - 3
+Nested cycles | O(V^2) | 4 - 8 (not 6)
+Dijkstra’s Shortest Path | O(E + VlogV) | 6
+Search Min totalLength | O(V) | 9
+Total | O(V^2E + V^3logV) | 4 - 8
+
 In addition, it was not taken into consideration some variables that could have a considerable significance for our AED goal such as the different concentration of rooms in different parts of the graph and the number of people present in each rooms. In fact, if a single room that contains just a small number of people is far away from all the others, this room will affect the algorithm result in the same way of other “more significant” rooms.
 
 ## 3. MEASURES
 
 Finally, we created a simple python script (**GraphMeasures.py**) to extract few meaningful measures that characterize the output graph. We compare the output graph of the FBK first floor west building, after (A04) and before the manual refinement (A04-refined) where all nodes not connected to the main graph were removed. The results are shown in the following table.
+
+Graph | Connected components	| Nodes	| Edges |	Average degree | Density	| Bi-connected	| Average path length
+ --- | --- | --- | --- | --- | --- | --- | --- |
+**A04** | 16	|251	| 308	|2,4541	| 0,0098	| False	| /
+**A04-refined** | 1	| 228	| 300	| 2,6315	| 0,0116	| False	| 33,19
 
 We manually removed all nodes which were not connected to the main corridor. However, the output graph has a plenty of nodes and edges, that is because the corridor is split in different parts and linked to one another by a node. The average degree of the graph, where the degree of a vertex of a graph is the number of edges incident to the vertex, prove that most of the room of the build are connected only with the corridor. This data is confirmed by the bi-connectivity and density (number of nodes divided by number of edges).
 
